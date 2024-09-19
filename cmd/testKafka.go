@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 yantao
 */
 package cmd
 
@@ -40,6 +40,11 @@ func testKafka(cmd *cobra.Command, args []string) {
 		topic = args[1] // 如果提供了主题，则使用提供的主题
 	}
 	fmt.Println("Kafka 主题为：", topic)
+
+	// 确保主题存在
+	if err := ensureTopicExists(addr, topic); err != nil {
+		log.Fatalf("Failed to ensure topic exists: %v", err)
+	}
 
 	// 创建一个等待组，用于等待所有协程完成
 	var wg sync.WaitGroup
@@ -122,4 +127,43 @@ func startProducer(addr, topic string) {
 		time.Sleep(1 * time.Second) // 等待一段时间以确保消息被消费者读取
 	}
 
+}
+
+func ensureTopicExists(addr, topic string) error {
+	// 创建一个新的 Sarama 配置
+	config := sarama.NewConfig()
+	config.Version = sarama.V3_0_0_0 // 根据你的 Kafka 版本设置
+
+	// 创建一个 ClusterAdmin 实例
+	admin, err := sarama.NewClusterAdmin([]string{addr}, config)
+	if err != nil {
+		return fmt.Errorf("failed to create cluster admin: %v", err)
+	}
+	defer admin.Close()
+
+	// 尝试描述主题以检查其是否存在
+	_, err = admin.DescribeTopics([]string{topic})
+	if err != nil {
+		// 如果找不到主题，则尝试创建它
+		if kerr, ok := err.(sarama.KError); ok && kerr == sarama.ErrUnknownTopicOrPartition {
+			// 定义新主题的详细信息
+			topicDetail := &sarama.TopicDetail{
+				NumPartitions:     1, // 设置分区数量
+				ReplicationFactor: 1, // 设置副本因子
+			}
+
+			// 创建新主题
+			err = admin.CreateTopic(topic, topicDetail, false) // 最后一个参数是是否等待所有副本都可用
+			if err != nil {
+				return fmt.Errorf("failed to create topic: %v", err)
+			}
+			log.Printf("Topic %s created successfully.", topic)
+		} else {
+			return fmt.Errorf("failed to describe topics: %v", err)
+		}
+	} else {
+		log.Printf("Topic %s already exists.", topic)
+	}
+
+	return nil
 }
