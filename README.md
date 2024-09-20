@@ -16,13 +16,21 @@
 ## 2.kafka测试
 
 ```shell
-./tool tk 127.0.0.1:9092 #主题默认为 test
+./tool kt 127.0.0.1:9092 #主题默认为 test
 ```
 
 也可以指定主题
 
 ```shell
-./tool tk 127.0.0.1:9092 hello
+./tool kt 127.0.0.1:9092 hello
+```
+
+
+
+## 3.向kafka发送自定义数据
+
+```shell
+./tool ks 127.0.0.1:9092 hello '{"a":"1","b":"2"}'
 ```
 
 
