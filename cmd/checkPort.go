@@ -15,9 +15,18 @@ import (
 var checkPortCmd = &cobra.Command{
 	Use:     "checkPort",
 	Aliases: []string{"cp"},
-	Short:   "检查端口是否被占用",
-	Long:    ``,
-	Run:     checkPort,
+	Short:   "检查端口是否被占用 (别名: cp)",
+	Long: `
+检查指定的端口是否已经被其他服务占用。
+
+使用方法:
+  tool checkPort [端口号]
+  tool cp 		 [端口号]  # 使用别名
+
+其中：
+  端口号 是你想要检查的端口号。
+`,
+	Run: checkPort,
 }
 
 func init() {
@@ -26,7 +35,7 @@ func init() {
 
 func checkPort(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
-		fmt.Println(`Usage: tool cp port`)
+		fmt.Println(`Usage: tool checkPort|cp port`)
 		return
 	}
 

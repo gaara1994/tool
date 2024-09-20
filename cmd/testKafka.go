@@ -16,11 +16,17 @@ import (
 
 // testKafkaCmd represents the testKafka command
 var testKafkaCmd = &cobra.Command{
-	Use:     "kafka",
-	Aliases: []string{"tk", "kafka"},
-	Short:   "测试kafka",
-	Long:    ``,
-	Run:     testKafka,
+	Use:     "testKafka",
+	Aliases: []string{"tk"},
+	Short:   "测试kafka (别名: tk)",
+	Long: `
+连接测试kafka。
+
+使用方法:
+  tool testKafka [broker] [topic]
+  tool tk 		 [broker] [topic]  # 使用别名
+`,
+	Run: testKafka,
 }
 
 func init() {
@@ -28,7 +34,8 @@ func init() {
 }
 func testKafka(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
-		fmt.Println("Usage: tool tk addr topic")
+		fmt.Println("Usage: tool tk broker topic")
+
 		return
 	}
 
@@ -92,9 +99,9 @@ func startConsumer(addr, topic string) {
 		case msg := <-partitionConsumer.Messages():
 			fmt.Printf("Consumer: Received message: %s\n", string(msg.Value))
 		case err := <-partitionConsumer.Errors():
-			log.Printf("Consumer error: %v\n", err)
+			fmt.Printf("Consumer error: %v\n", err)
 		case <-ctx.Done():
-			log.Println("Context timeout, stopping consumer")
+			fmt.Println("Context timeout, stopping consumer")
 			return
 		}
 	}
@@ -157,12 +164,12 @@ func ensureTopicExists(addr, topic string) error {
 			if err != nil {
 				return fmt.Errorf("failed to create topic: %v", err)
 			}
-			log.Printf("Topic %s created successfully.", topic)
+			fmt.Printf("Topic %s created successfully.", topic)
 		} else {
 			return fmt.Errorf("failed to describe topics: %v", err)
 		}
 	} else {
-		log.Printf("Topic %s already exists.", topic)
+		fmt.Printf("Topic %s already exists.\n", topic)
 	}
 
 	return nil
