@@ -41,3 +41,15 @@
 ./tool kr 127.0.0.1:9092 hello
 ```
 
+
+
+## 5.运行指定秒数
+
+```shell
+./tool rs 60 succeed
+```
+
+```
+./tool rs 秒数 [succeed|failed|exit|panic|loop|maxLoad]
+```
+
